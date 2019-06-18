@@ -1,3 +1,5 @@
+// tutorial can be found here : https://www.robinwieruch.de/react-state-usereducer-usestate-usecontext/#usecontext-context-hook
+
 import React, { useState, useReducer, useContext, createContext } from "react";
 import ReactDOM from "react-dom";
 import uuid from "uuid/v4";
@@ -86,9 +88,11 @@ const App = () => {
   });
 
   return (
-    <TodoContext.Provider value={{ dispatchTodos, dispatchFilter }}>
+    <TodoContext.Provider
+      value={{ dispatchTodos, dispatchFilter, filteredTodos }}
+    >
       <Filter />
-      <TodoList todos={filteredTodos} />
+      <TodoList />
       <AddTodo />
     </TodoContext.Provider>
   );
@@ -125,13 +129,18 @@ const Filter = () => {
   );
 };
 
-const TodoList = ({ todos }) => (
-  <ul>
-    {todos.map(todo => (
-      <TodoItem key={todo.id} todo={todo} />
-    ))}
-  </ul>
-);
+const TodoList = () => {
+  const todoContext = useContext(TodoContext);
+  const { filteredTodos } = todoContext;
+
+  return (
+    <ul>
+      {filteredTodos.map(todo => (
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+    </ul>
+  );
+};
 
 const TodoItem = ({ todo }) => {
   const todoContext = useContext(TodoContext);
