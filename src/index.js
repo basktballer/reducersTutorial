@@ -1,4 +1,4 @@
-import React, { useState, useReducer, createContext } from "react";
+import React, { useState, useReducer, useContext, createContext } from "react";
 import ReactDOM from "react-dom";
 import uuid from "uuid/v4";
 
@@ -86,25 +86,28 @@ const App = () => {
   });
 
   return (
-    <TodoContext.Provider value={dispatchTodos}>
-      <Filter dispatch={dispatchFilter} />
-      <TodoList dispatch={dispatchTodos} todos={filteredTodos} />
+    <TodoContext.Provider value={{ dispatchTodos, dispatchFilter }}>
+      <Filter />
+      <TodoList todos={filteredTodos} />
       <AddTodo />
     </TodoContext.Provider>
   );
 };
 
-const Filter = ({ dispatch }) => {
+const Filter = () => {
+  const todoContext = useContext(TodoContext);
+  const { dispatchFilter } = todoContext;
+
   const handleShowAll = () => {
-    dispatch({ type: "SHOW_ALL" });
+    dispatchFilter({ type: "SHOW_ALL" });
   };
 
   const handleShowComplete = () => {
-    dispatch({ type: "SHOW_COMPLETE" });
+    dispatchFilter({ type: "SHOW_COMPLETE" });
   };
 
   const handleShowIncomplete = () => {
-    dispatch({ type: "SHOW_INCOMPLETE" });
+    dispatchFilter({ type: "SHOW_INCOMPLETE" });
   };
 
   return (
@@ -122,17 +125,20 @@ const Filter = ({ dispatch }) => {
   );
 };
 
-const TodoList = ({ dispatch, todos }) => (
+const TodoList = ({ todos }) => (
   <ul>
     {todos.map(todo => (
-      <TodoItem key={todo.id} dispatch={dispatch} todo={todo} />
+      <TodoItem key={todo.id} todo={todo} />
     ))}
   </ul>
 );
 
-const TodoItem = ({ dispatch, todo }) => {
+const TodoItem = ({ todo }) => {
+  const todoContext = useContext(TodoContext);
+  const { dispatchTodos } = todoContext;
+
   const handleChange = () => {
-    dispatch({
+    dispatchTodos({
       type: todo.complete ? "UNDO_TODO" : "DO_TODO",
       id: todo.id
     });
@@ -152,7 +158,9 @@ const TodoItem = ({ dispatch, todo }) => {
   );
 };
 
-const AddTodo = ({ dispatch }) => {
+const AddTodo = () => {
+  const todoContext = useContext(TodoContext);
+  const { dispatchTodos } = todoContext;
   const [task, setTask] = useState("");
 
   const handleChange = event => {
@@ -161,7 +169,7 @@ const AddTodo = ({ dispatch }) => {
 
   const handleSubmit = event => {
     if (task) {
-      dispatch({ type: "ADD_TODO", task, id: uuid() });
+      dispatchTodos({ type: "ADD_TODO", task, id: uuid() });
     }
 
     setTask("");
